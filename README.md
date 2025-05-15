@@ -28,7 +28,7 @@ pip install requests beautifulsoup4
 4. 各DBフォルダ内のサブフォルダ（s1, s2, ...）にある `.mat` ファイルが `all_mat` フォルダにまとめられます。
 
 ```bash
-python download_ninapro.py
+python app.py
 ```
 
 ## フォルダ構成例
