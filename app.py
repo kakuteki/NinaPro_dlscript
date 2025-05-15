@@ -60,7 +60,7 @@ for db_index in range(1, 11):
                 print(f"    ❌ ダウンロード/解凍失敗: {link} エラー: {e}")
 
         # スレッドプールで並列実行
-        with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             executor.map(download_and_extract_zip, zip_links)
 
         # 以下は.mat統合処理はそのまま
