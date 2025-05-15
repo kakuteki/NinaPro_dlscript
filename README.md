@@ -1,6 +1,6 @@
 # NinaPro ZIP Downloader & Extractor
 
-このPythonスクリプトは、NinaProデータベースの各データセット（DB1〜DB10）に対応したウェブページからZIPファイルを自動でダウンロードし、解凍・整理を行います。
+このPythonスクリプトは、[NinaProデータベース](https://ninapro.hevs.ch/)の各データセット（DB1〜DB10）に対応したウェブページからZIPファイルを自動でダウンロードし、解凍・整理を行います。
 
 ## 機能
 
