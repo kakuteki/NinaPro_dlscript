@@ -22,7 +22,7 @@ pip install requests beautifulsoup4
 
 ## 使い方
 
-1. スクリプトを任意のPython環境に保存します（例：`download_ninapro.py`）。
+1. スクリプトを任意のPython環境に保存します。
 2. 実行すると、ユーザーのデスクトップ上に `NinaPro_Zips` フォルダが作成され、その中に `DB1` 〜 `DB10` のフォルダが作られます。
 3. 各DBフォルダ内にZIPファイルがダウンロードされ、解凍されます。
 4. 各DBフォルダ内のサブフォルダ（s1, s2, ...）にある `.mat` ファイルが `all_mat` フォルダにまとめられます。
