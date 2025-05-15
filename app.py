@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 from pathlib import Path
 import zipfile
 import shutil
+import concurrent.futures
 
 # NinaPro のベース URL
 BASE_URL_PREFIX = "https://ninapro.hevs.ch/instructions/"
@@ -18,17 +19,14 @@ for db_index in range(1, 11):
     page_url = f"{BASE_URL_PREFIX}{db_name}.html"
     print(f"\n📄 {db_name} を処理中: {page_url}")
 
-    # 各DBごとの保存先ディレクトリ
     db_dir = BASE_SAVE_DIR / db_name
     os.makedirs(db_dir, exist_ok=True)
 
     try:
-        # ページ取得
         response = requests.get(page_url)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # ZIPリンクを収集
         zip_links = []
         for a_tag in soup.find_all("a", href=True):
             href = a_tag['href']
@@ -38,15 +36,14 @@ for db_index in range(1, 11):
 
         print(f"  🔗 {len(zip_links)} 個のZIPファイルが見つかりました。")
 
-        for link in zip_links:
+        # 並列でのZIPダウンロード関数
+        def download_and_extract_zip(link):
             filename = os.path.basename(link)
             zip_path = db_dir / filename
             extract_dir = db_dir / filename.replace(".zip", "")
 
-            print(f"    ⬇️ ダウンロード中: {filename}")
-
             try:
-                # ZIPをダウンロード
+                print(f"    ⬇️ ダウンロード中: {filename}")
                 with requests.get(link, stream=True) as r:
                     r.raise_for_status()
                     with open(zip_path, 'wb') as f:
@@ -54,7 +51,6 @@ for db_index in range(1, 11):
                             f.write(chunk)
                 print(f"    ✅ ダウンロード完了: {zip_path}")
 
-                # ZIPを解凍
                 print(f"    📦 解凍中...")
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     zip_ref.extractall(extract_dir)
@@ -63,15 +59,19 @@ for db_index in range(1, 11):
             except Exception as e:
                 print(f"    ❌ ダウンロード/解凍失敗: {link} エラー: {e}")
 
-        # .matファイルをまとめるフォルダを作成
+        # スレッドプールで並列実行
+        with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+            executor.map(download_and_extract_zip, zip_links)
+
+        # 以下は.mat統合処理はそのまま
         all_mat_dir = db_dir / "all_mat"
         os.makedirs(all_mat_dir, exist_ok=True)
         mat_count = 0
 
         for folder in db_dir.iterdir():
-            if folder.is_dir() and folder.name.lower().startswith("s"):  # s1, s2, ...
+            if folder.is_dir() and folder.name.lower().startswith("s"):
                 for file in folder.glob("*.mat"):
-                    dest_file = all_mat_dir / file.name  # ファイル名はそのまま
+                    dest_file = all_mat_dir / file.name
                     try:
                         shutil.copy(file, dest_file)
                         mat_count += 1
